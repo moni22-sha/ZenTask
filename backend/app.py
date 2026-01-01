@@ -5,6 +5,14 @@ from database.db import get_db
 from database.models import create_tables
 from email_service import send_email
 from reminder_service import create_reminder
+from db import create_tables
+from users import add_user
+
+# Step 1: Create tables
+create_tables()
+
+# Step 2: Add a sample user
+add_user("John Doe", "john@example.com", "password123")
 
 app = Flask(__name__)
 CORS(app)
