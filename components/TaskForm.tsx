@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Task, Priority } from "../types";
-import { createTask } from "@/services/taskservice";
+import { sendReminder } from "../services/reminderservice";
 
 interface TaskFormProps {
   isOpen: boolean;
@@ -8,6 +8,7 @@ interface TaskFormProps {
   onSubmit: (taskData: Partial<Task>) => void;
   initialData?: Task | null;
 }
+
 
 const TaskForm: React.FC<TaskFormProps> = ({
   isOpen,
@@ -18,54 +19,56 @@ const TaskForm: React.FC<TaskFormProps> = ({
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [priority, setPriority] = useState<Priority>(Priority.MEDIUM);
+  const [email, setEmail] = useState("");
   const [reminderTime, setReminderTime] = useState("");
-
-  // ✅ Get logged-in user
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  createTask({
-  title,
-  dueDate,
-  reminderTime,
-  priority,
-});
-
 
   useEffect(() => {
     if (initialData) {
       setTitle(initialData.title);
       setDueDate(initialData.dueDate);
       setPriority(initialData.priority);
+      setEmail(initialData.email ?? "");
       setReminderTime(initialData.reminderTime ?? "");
     } else {
       setTitle("");
       setDueDate("");
       setPriority(Priority.MEDIUM);
+      setEmail("");
       setReminderTime("");
     }
   }, [initialData, isOpen]);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title || !dueDate || !reminderTime) return;
+    if (!title || !dueDate || !email || !reminderTime) return;
 
-    if (!user?.id) {
-      alert("User not logged in");
-      return;
-    }
-
-    const task: Partial<Task> = {
+    const task: Task = {
+      id: crypto.randomUUID(),
       title,
       dueDate,
       priority,
+      email,
       reminderTime,
-      user_id: user.id, // ✅ FIXED
+      completed: false,
+      isCompleted: false,
+      isImportant: false,
+      createdAt: new Date().toISOString(),
+      user_id: ""
     };
 
-    // ✅ Only send task to backend
+    // Update app state
     onSubmit(task);
+
+    // Schedule email reminder
+    try {
+      await sendReminder(task);
+    } catch (err) {
+      console.error("Reminder failed:", err);
+    }
+
     onClose();
   };
 
@@ -79,6 +82,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-8 space-y-5">
+          {/* Title */}
           <input
             type="text"
             placeholder="Task title"
@@ -88,6 +92,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
             className="w-full px-4 py-3 rounded-xl border"
           />
 
+          {/* Due Date */}
           <input
             type="datetime-local"
             required
@@ -96,6 +101,17 @@ const TaskForm: React.FC<TaskFormProps> = ({
             className="w-full px-4 py-3 rounded-xl border"
           />
 
+          {/* Email */}
+          <input
+            type="email"
+            placeholder="Reminder email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl border"
+          />
+
+          {/* Reminder Time */}
           <input
             type="datetime-local"
             required
@@ -104,6 +120,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
             className="w-full px-4 py-3 rounded-xl border"
           />
 
+          {/* Priority */}
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value as Priority)}
