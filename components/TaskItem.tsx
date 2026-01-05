@@ -45,6 +45,7 @@ const handleReminder = async () => {
   }
 };
 
+
   const getPriorityColor = (p: Priority) => {
     switch (p) {
       case Priority.HIGH: return 'bg-red-50 text-red-600 border-red-100';

@@ -53,6 +53,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
       }
     }, 800);
   };
+const handleLoginSuccess = (email: string) => {
+  localStorage.setItem(
+    "user",
+    JSON.stringify({ email })
+  );
+};
 
   return (
     // 2. Apply backgroundStyle here

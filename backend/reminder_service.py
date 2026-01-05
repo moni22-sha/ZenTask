@@ -1,24 +1,47 @@
-from fastapi import APIRouter, HTTPException
-from email_service import send_email
+from fastapi import APIRouter
+from pydantic import BaseModel
+from email.message import EmailMessage
+import smtplib
+import ssl
 
-router = APIRouter()
+reminder_router = APIRouter()
 
-@router.post("/reminder/send")
-def send_reminder(data: dict):
-    email = data.get("email")
-    title = data.get("title")
-    reminder_time = data.get("reminderTime")
+class Reminder(BaseModel):
+    email: str
+    title: str
+    reminderTime: str
 
-    if not email:
-        raise HTTPException(
-            status_code=400,
-            detail="User email missing"
-        )
 
+def send_email(to_email: str, subject: str, body: str):
+    sender_email = "monisha612003@gmail.com"
+    app_password = "ramjowoadmsfpjpd"
+
+    msg = EmailMessage()
+    msg["From"] = sender_email
+    msg["To"] = to_email
+    msg["Subject"] = subject
+    msg.set_content(body)
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        server.login(sender_email, app_password)
+        server.send_message(msg)
+
+
+@reminder_router.post("/email")
+def send_reminder(reminder: Reminder):
     send_email(
-        to=email,
-        subject="⏰ Task Reminder",
-        body=f"Reminder: {title} is due soon!"
-    )
+        reminder.email,
+        "⏰ Task Reminder",
+        f"""
+Hello 👋
 
+This is a reminder for your task:
+
+📝 Task: {reminder.title}
+⏰ Reminder Time: {reminder.reminderTime}
+
+Stay productive 🚀
+"""
+    )
     return {"message": "Reminder email sent successfully"}
