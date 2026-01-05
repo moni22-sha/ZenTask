@@ -5,7 +5,13 @@ admin_bp = Blueprint("admin", __name__)
 from flask import Blueprint, jsonify
 from database.db import get_db
 
-admin_bp = Blueprint("admin", __name__)
+from fastapi import APIRouter
+
+admin_router = APIRouter()
+
+@admin_router.get("/test")
+def test():
+    return {"message": "Admin working"}
 
 @admin_bp.route("/admin/users", methods=["GET"])
 def get_users():

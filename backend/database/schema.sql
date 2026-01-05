@@ -1,0 +1,17 @@
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT UNIQUE,
+  role TEXT DEFAULT 'USER',
+  status TEXT DEFAULT 'ACTIVE',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE reminders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    task_id INTEGER,
+    reminder_time TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user (id),
+    FOREIGN KEY (task_id) REFERENCES tasks (id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    
+)

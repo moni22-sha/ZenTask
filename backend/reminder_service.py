@@ -1,27 +1,24 @@
-from anyio import get_running_tasks
-from flask import request, jsonify
-from datetime import datetime
-from scheduler import schedule_reminder
+from fastapi import APIRouter, HTTPException
 from email_service import send_email
 
-def create_reminder():
-    data = request.json
+router = APIRouter()
 
-    email = data["email"]
-    title = data["title"]
-    reminder_time = datetime.fromisoformat(data["reminderTime"])
+@router.post("/reminder/send")
+def send_reminder(data: dict):
+    email = data.get("email")
+    title = data.get("title")
+    reminder_time = data.get("reminderTime")
 
-    schedule_reminder(email, title, reminder_time)
+    if not email:
+        raise HTTPException(
+            status_code=400,
+            detail="User email missing"
+        )
 
-    return jsonify({"message": "Reminder scheduled successfully"})
-def process_reminders():
-    tasks = get_running_tasks()
+    send_email(
+        to=email,
+        subject="⏰ Task Reminder",
+        body=f"Reminder: {title} is due soon!"
+    )
 
-    for task in tasks:
-        user = get_user_by_id(task.user_id)  # type: ignore # ✅ VALID PYTHON
-
-        if not user:
-            print("No user found")
-            continue
-
-        send_email(user.email, "Task Reminder", "Your task is due")
+    return {"message": "Reminder email sent successfully"}

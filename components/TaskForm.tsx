@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Task, Priority } from "../types";
-import { sendReminder } from "../services/reminderservice";
+import sendReminder from "../services/reminderservice";
+
 
 interface TaskFormProps {
   isOpen: boolean;

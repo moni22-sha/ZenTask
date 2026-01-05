@@ -24,18 +24,26 @@ const TaskItem: React.FC<TaskItemProps> = ({
 }) => {
   
   // 3. Implemented the reminder trigger logic
-  const handleSendReminder = async () => {
-    if (user?.email) {
-      try {
-        await triggerEmailReminder(user.email, task.title, task.dueDate);
-        alert("Reminder sent successfully!");
-      } catch (error) {
-        console.error("Failed to send reminder:", error);
-      }
-    } else {
-      alert("No user email found to send reminder.");
-    }
-  };
+  
+
+const handleReminder = async () => {
+  if (!user.email) {
+    alert("User email not found. Please login again.");
+    return;
+  }
+
+  try {
+    await triggerEmailReminder(
+      user.email,
+      task.title,
+      task.reminderTime
+    );
+
+    alert("Reminder email sent successfully ✅");
+  } catch (err) {
+    alert("Failed to send reminder");
+  }
+};
 
   const getPriorityColor = (p: Priority) => {
     switch (p) {
@@ -83,7 +91,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         {/* 4. Added the Reminder Button to the UI */}
         <button 
-          onClick={handleSendReminder}
+          onClick={handleReminder}
           title="Send Email Reminder"
           className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-gray-100 rounded-lg transition-colors"
         >

@@ -26,7 +26,7 @@ export interface Task {
 }
 
 export interface User {
-  id: string;
+  id: number;
   username: string;
   email?: string;
   role: 'admin' | 'user';
@@ -39,10 +39,7 @@ export interface User {
  // Add this line to your User interface
 }
 
-export interface Todo {
-  id: number;
-  title: string;
-}
+
 
 export interface AuthState {
   isAuthenticated: boolean;
@@ -62,6 +59,31 @@ export interface Task {
 
 
 
+}
+export interface Todo{
+  id: number;
+  title: string;
+  completed: boolean;
+  userId: number;
+}
+export interface UserRole {
+  id: number;
+  username: string;
+  role: UserRole;
+  email?: string;
+  name: string;
+  avatar: string;
+  isActive: boolean;
+  reminderTime: string;
+
+
+
+
+}
+export interface AuthResponse{
+  token: string;
+  user: User;
+  
 }
 // services/reminderService.ts
 

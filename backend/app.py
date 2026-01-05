@@ -1,57 +1,53 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from database.db import get_db
 from database.models import create_tables
 from email_service import send_email
 from reminder_service import create_reminder
-from db import create_tables
-from users import add_user
+from users import add_user  # type: ignore
 
-# Step 1: Create tables
-create_tables()
+from admin import admin_router
+from task import task_router
 
-# Step 2: Add a sample user
-add_user("John Doe", "john@example.com", "password123")
+app = FastAPI()
 
-app = Flask(__name__)
-CORS(app)
-
-# ✅ Create DB tables
-create_tables()
+# Allow CORS (optional, useful for frontend)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 # -------------------------
-# ✅ SAVE USER ON LOGIN
+# ✅ INCLUDE ROUTERS
 # -------------------------
-def save_user(name, email):
-    db = get_db()
-    cursor = db.cursor()
+app.include_router(admin_router, prefix="/admin")
+app.include_router(task_router, prefix="/tasks")
 
-    cursor.execute("""
-        INSERT INTO users (name, email, role, is_active)
-        VALUES (?, ?, 'user', 1)
-        ON CONFLICT(email) DO UPDATE SET is_active = 1
-    """, (name, email))
-
-    db.commit()
-    db.close()
+# -------------------------
+# ✅ CREATE DB TABLES
+# -------------------------
+create_tables()
 
 # -------------------------
 # ✅ HEALTH CHECK
 # -------------------------
-@app.route("/", methods=["GET"])
-def home():
-    return jsonify({"status": "Backend running"})
+@app.get("/")
+async def home():
+    return {"status": "Backend running"}
 
 # -------------------------
-# ✅ CREATE TASK (SQLITE)
+# ✅ CREATE TASK
 # -------------------------
-@app.route("/tasks", methods=["POST"])
-def create_task():
-    data = request.json
+@app.post("/tasks")
+async def create_task(request: Request):
+    data = await request.json()
 
     if not data.get("user_id"):
-        return jsonify({"error": "user_id missing"}), 400
+        raise HTTPException(status_code=400, detail="user_id missing")
 
     db = get_db()
     cursor = db.cursor()
@@ -69,37 +65,31 @@ def create_task():
     db.commit()
     db.close()
 
-    return jsonify({"message": "Task created successfully"})
+    return {"message": "Task created successfully"}
 
 # -------------------------
 # ✅ SEND REMINDER EMAIL
 # -------------------------
-@app.route("/send-reminder", methods=["POST"])
-def handle_reminder():
-    data = request.json
+@app.post("/send-reminder")
+async def handle_reminder(request: Request):
+    data = await request.json()
 
-    user_email = data.get("email")
-    task_name = data.get("taskName", "a task")
+    email = data.get("email")
+    task_name = data.get("taskName")
 
-    if not user_email:
-        return jsonify({"error": "Email missing"}), 400
+    if not email:
+        raise HTTPException(status_code=400, detail="No user email found")
 
-    subject = f"Reminder: {task_name}"
-    body = f"Hello, this is a reminder for your task: {task_name}."
+    subject = f"⏰ Reminder: {task_name}"
+    body = f"Hello,\n\nThis is a reminder for your task:\n\n{task_name}"
 
-    send_email(user_email, subject, body)
+    send_email(email, subject, body)
 
-    return jsonify({"message": "Reminder sent successfully"})
+    return {"message": "Reminder email sent successfully"}
 
 # -------------------------
 # ✅ MANUAL REMINDER TEST
 # -------------------------
-@app.route("/reminder", methods=["POST"])
-def reminder():
+@app.post("/reminder")
+async def reminder():
     return create_reminder()
-
-# -------------------------
-# ✅ RUN SERVER
-# -------------------------
-if __name__ == "__main__":
-    app.run(port=5000, debug=True)

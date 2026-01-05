@@ -1,6 +1,6 @@
 from .db import get_db
-from sqlalchemy import Column, String, DateTime, ForeignKey  # type: ignore
-from sqlalchemy.dialects.postgresql import UUID # type: ignore
+from sqlalchemy import Column, String, DateTime, ForeignKey  
+from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from database.db import Base
 def create_tables():
