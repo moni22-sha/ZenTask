@@ -45,7 +45,6 @@ const handleReminder = async () => {
   }
 };
 
-
   const getPriorityColor = (p: Priority) => {
     switch (p) {
       case Priority.HIGH: return 'bg-red-50 text-red-600 border-red-100';
@@ -74,7 +73,7 @@ const handleReminder = async () => {
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <h3 className={`text-sm font-semibold truncate ${task.isCompleted ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
+          <h3 className={`text-xl font-semibold truncate ${task.isCompleted ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
             {task.title}
           </h3>
           <span className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${getPriorityColor(task.priority)}`}>
@@ -82,7 +81,7 @@ const handleReminder = async () => {
           </span>
         </div>
         <div className="flex items-center gap-3 mt-1">
-          <span className="text-[10px] text-gray-400 flex items-center gap-1">
+          <span className="text-xs text-gray-400 flex items-center gap-1">
             <ICONS.Calendar className="w-3 h-3" />
             {new Date(task.dueDate).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
           </span>

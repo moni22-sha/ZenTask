@@ -3,8 +3,10 @@ from pydantic import BaseModel
 from email.message import EmailMessage
 import smtplib
 import ssl
+from email_service import send_email
 
 reminder_router = APIRouter()
+send_email("recipient@example.com", "Test Email", "Hello from Zentask!")
 
 class Reminder(BaseModel):
     email: str
@@ -45,3 +47,9 @@ Stay productive 🚀
 """
     )
     return {"message": "Reminder email sent successfully"}
+print("⏳ Reminder scheduler started")
+import time
+while True:
+
+    time.sleep(60)
+    print(" Checking for due reminders...")

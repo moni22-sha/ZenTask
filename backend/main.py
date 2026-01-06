@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from admin import admin_router
 from task import task_router
 from reminder_service import reminder_router   # 👈 ADD THIS
+from task import router as task_router
 
 app = FastAPI()
 

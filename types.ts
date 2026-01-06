@@ -6,12 +6,13 @@ export enum Priority {
 }
 
 export enum TaskStatus {
-  ALL = 'All Tasks',
+  ALL = 'All',
   TODAY = 'Today',
   UPCOMING = 'Upcoming',
   IMPORTANT = 'Important',
-  COMPLETED = 'Completed'
+  COMPLETED = 'Completed',
 }
+
 
 export interface Task {
   id: string;
@@ -19,6 +20,7 @@ export interface Task {
   description?: string;
   dueDate: string;
   priority: Priority;
+
   isCompleted: boolean;
   isImportant: boolean;
   createdAt: string;

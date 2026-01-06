@@ -22,6 +22,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentFilter, setFilter, taskCounts 
       <div className="p-6 flex items-center gap-3">
         <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
           <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
@@ -36,7 +37,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentFilter, setFilter, taskCounts 
             className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all mb-1 ${
               currentFilter === item.label
                 ? 'bg-blue-50 text-blue-600 font-semibold'
-                : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+                : 'text-black font-semibold text-3xl'
             }`}
           >
             <div className="flex items-center gap-3">

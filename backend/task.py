@@ -1,6 +1,8 @@
 from database.db import SessionLocal
 from database.models import Task
+from fastapi import APIRouter
 
+task_router = APIRouter()
 def create_task(data):
     db = SessionLocal()
 
@@ -12,9 +14,11 @@ def create_task(data):
         user_id=data["user_id"],
     )
 
-    db.add(task)
-    db.commit()
-    db.refresh(task)
-    db.close()
+
+@task_router.get("/")
+def get_tasks():
+    return {"message": "Tasks working"}
+
+
 
     return task

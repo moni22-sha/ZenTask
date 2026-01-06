@@ -74,8 +74,9 @@ const App: React.FC = () => {
       createdAt: new Date().toISOString(),
       email: user?.email || '',
       reminderTime: taskData.reminderTime || 0,
-      
+      user_id: user ? user.id.toString() : '',
       completed: false,
+    
       ...taskData,
     };
     setTasks(prev => [newTask, ...prev]);
@@ -87,8 +88,12 @@ const App: React.FC = () => {
 
   const deleteTask = (id: string) => {
     setTasks(prev => prev.filter(t => t.id !== id));
-  };
 
+  };
+  
+  const toggleUpcoming = (id: string) => {
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, isUpcoming: !t.isUpcoming } : t));
+  };
   const toggleComplete = (id: string) => {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, isCompleted: !t.isCompleted } : t));
   };
@@ -104,10 +109,9 @@ const App: React.FC = () => {
     if (filter === TaskStatus.TODAY) {
       const today = new Date().toDateString();
       result = result.filter(t => new Date(t.dueDate).toDateString() === today);
-    } else if (filter === TaskStatus.UPCOMING) {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      result = result.filter(t => new Date(t.dueDate) >= tomorrow);
+    } else if (filter === TaskStatus.IMPORTANT) {
+      result = result.filter(t => t.isImportant);
+    
     } else if (filter === TaskStatus.IMPORTANT) {
       result = result.filter(t => t.isImportant);
     } else if (filter === TaskStatus.COMPLETED) {
@@ -125,7 +129,13 @@ const App: React.FC = () => {
   const taskCounts = {
     [TaskStatus.ALL]: tasks.length,
     [TaskStatus.TODAY]: tasks.filter(t => new Date(t.dueDate).toDateString() === new Date().toDateString()).length,
-    [TaskStatus.UPCOMING]: tasks.filter(t => new Date(t.dueDate) > new Date()).length,
+   
+
+[TaskStatus.UPCOMING]: tasks.filter(t =>
+  !t.isCompleted &&
+  new Date(t.dueDate) >= new Date(new Date().setHours(0, 0, 0, 0))
+).length,
+
     [TaskStatus.IMPORTANT]: tasks.filter(t => t.isImportant).length,
     [TaskStatus.COMPLETED]: tasks.filter(t => t.isCompleted).length,
   };
@@ -209,7 +219,7 @@ const handleManualReminder = async (taskTitle: string, dueDate: string) => {
               <div className="flex items-center justify-between mb-8">
                 <div>
                   <h1 className="text-2xl font-bold text-gray-800">{filter}</h1>
-                  <p className="text-sm text-gray-500 mt-1">Manage your productivity effortlessly.</p>
+                  <p className="text-sm text-black-500 mt-1">Manage your productivity effortlessly.</p>
                 </div>
                 <button 
                   onClick={() => { setEditingTask(null); setIsFormOpen(true); }}
@@ -230,14 +240,15 @@ const handleManualReminder = async (taskTitle: string, dueDate: string) => {
                       onToggleComplete={toggleComplete}
                       onToggleImportant={toggleImportant}
                       onDelete={deleteTask}
+                    
                       onEdit={(t) => { setEditingTask(t); setIsFormOpen(true); }}
                     />
                   ))}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-                    <svg className="w-12 h-12 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                    <svg className="w-24 h-24 text-blue-300" fill="none" viewBox="0 0 32 32" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                     </svg>
                   </div>
@@ -274,6 +285,10 @@ const handleManualReminder = async (taskTitle: string, dueDate: string) => {
 
 export default App;
 function triggerEmailReminder(email: any, taskTitle: string, dueDate: string) {
+  throw new Error('Function not implemented.');
+}
+
+function startofToday() {
   throw new Error('Function not implemented.');
 }
 

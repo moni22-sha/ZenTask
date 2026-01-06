@@ -3,10 +3,10 @@
 import sys
 import os
 
-# Add the backend directory to the path so we can import email_service
-sys.path.append(os.path.dirname(__file__))
+# Add backend folder to Python path FIRST
+sys.path.append(os.path.join(os.path.dirname(__file__), "backend"))
 
-from backend.email_service import send_email
+from email_service import send_email
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -14,7 +14,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     email = sys.argv[1]
-    subject = "Test Email from Zentask Pro"
+    subject = "Test Email from ZenTask Pro"
     body = "This is a test email to verify the email service is working."
 
     send_email(email, subject, body)
+    print(f"Test email sent to {email}")

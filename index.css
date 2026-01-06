@@ -5,13 +5,19 @@
 
 :root {
   --primary: #4f46e5;
-  --primary-hover: #4338ca;
+  --primary-hover: #655ae1;
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
   
 }
+
+
+
+
+
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Task, Priority } from '../types';
 import { geminiService } from '../services/geminiService';
@@ -10,10 +9,12 @@ interface StatsProps {
 
 const Stats: React.FC<StatsProps> = ({ tasks }) => {
   const [aiTip, setAiTip] = useState("Analyzing your productivity...");
-  const completedCount = tasks.filter(t => t.isCompleted).length;
-  const pendingCount = tasks.filter(t => !t.isCompleted).length;
-  const highPriorityCount = tasks.filter(t => t.priority === Priority.HIGH && !t.isCompleted).length;
-  const completionRate = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
+
+  
+    const completionRate =
+    tasks.length > 0 ? Math.round((tasks.filter(t => t.isCompleted).length / tasks.length) * 100) : 0;
+
+
 
   useEffect(() => {
     const fetchSummary = async () => {
@@ -29,8 +30,11 @@ const Stats: React.FC<StatsProps> = ({ tasks }) => {
 
   return (
     <div className="w-80 bg-white border-l border-gray-200 h-full p-6 hidden lg:flex flex-col gap-8">
+      {/* Productivity Header */}
       <div>
         <h3 className="text-lg font-bold text-gray-800 mb-6">Productivity</h3>
+
+        {/* Completion Circle */}
         <div className="relative flex items-center justify-center mb-8">
           <svg className="w-40 h-40 transform -rotate-90">
             <circle
@@ -57,30 +61,26 @@ const Stats: React.FC<StatsProps> = ({ tasks }) => {
           </svg>
           <div className="absolute flex flex-col items-center">
             <span className="text-3xl font-bold text-gray-800">{completionRate}%</span>
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Done</span>
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
+              Done
+            </span>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
-            <span className="text-xs font-medium text-gray-500 block mb-1">Pending</span>
-            <span className="text-2xl font-bold text-gray-800">{pendingCount}</span>
-          </div>
-          <div className="bg-red-50 rounded-2xl p-4 border border-red-100">
-            <span className="text-xs font-medium text-red-500 block mb-1">High Priority</span>
-            <span className="text-2xl font-bold text-red-600">{highPriorityCount}</span>
-          </div>
+        {/* Stats Boxes:  / Pending / High Priority */}
+     
+
+        {/* AI Tip */}
+        <div className="p-4 mx-4 mb-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-xl shadow-blue-100 text-white relative overflow-hidden group">
+        
+          <span className="text-2xs font-bold text-white block mb-1">AI Tip</span>
+          <p className="text-sm text-white">{aiTip}</p>
         </div>
       </div>
 
-      
-
-
+      {/* Calendar */}
       <Calendar />
-      
-        </div>
-    
-    
+    </div>
   );
 };
 
