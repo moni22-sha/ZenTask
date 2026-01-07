@@ -1,65 +1,26 @@
-import sqlite3
-import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-
-DATABASE_URL = "sqlite:///./app.db"
-
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False}  # needed for SQLite
-)
-
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine
-)
-
-Base = declarative_base()
-
-# Ensure the database file path exists
-BASE_DIR = os.path.dirname(__file__)
-DB_PATH = os.path.join(BASE_DIR, 'zentask.db')
-
-
+import sqlite3
 
 def get_db():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
     return conn
 
-# Example: create a table if it doesn't exist
-def create_table():
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS tasks (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            due_date TEXT,
-            reminder_time TEXT,
-            email TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
+DATABASE_URL = "sqlite:///./tasks.db"
 
-# Example: insert data into table
-def add_task(title, due_date, reminder_time, email):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO tasks (title, due_date, reminder_time, email)
-        VALUES (?, ?, ?, ?)
-    ''', (title, due_date, reminder_time, email))
-    conn.commit()  # 🔑 Important! Without this, nothing is saved
-    conn.close()
-    print("Task saved successfully!")
+engine = create_engine(
+    DATABASE_URL, connect_args={"check_same_thread": False}
+)
 
-# Example usage
-if __name__ == "__main__":
-    create_table()
-    add_task("Finish report", "2026-01-02", "2026-01-02 10:00", "user@example.com")
-    print(" Task added to the database.")
- 
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base = declarative_base()
+
+# ✅ THIS FUNCTION MUST EXIST
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

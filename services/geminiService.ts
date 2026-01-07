@@ -1,6 +1,26 @@
 
 import { GoogleGenAI } from "@google/genai";
 import { Task } from '../types';
+import { Priority } from "../types";
+
+export async function getAIPrioritySuggestion(
+  title: string,
+  description?: string
+): Promise<Priority> {
+  // Later you can plug Gemini API here
+  const text = `${title} ${description ?? ""}`.toLowerCase();
+
+  if (text.includes("urgent") || text.includes("asap")) {
+    return Priority.HIGH;
+  }
+
+  if (text.includes("today") || text.includes("soon")) {
+    return Priority.MEDIUM;
+  }
+
+  return Priority.LOW;
+}
+
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
 
@@ -24,4 +44,11 @@ export const geminiService = {
       return "Focus on your high priority tasks today!";
     }
   }
+};
+export const generateReminderEmail = async (
+taskTitle: string, dueDate: string, tone: any, p0: any) => {
+  return `
+    ⏰ Reminder!
+    Your task "${taskTitle}" is due on ${dueDate}.
+  `;
 };

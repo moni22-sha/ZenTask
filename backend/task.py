@@ -1,24 +1,17 @@
-from database.db import SessionLocal
-from database.models import Task
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from database.db import get_db
 
-task_router = APIRouter()
-def create_task(data):
-    db = SessionLocal()
-
-    task = Task(
-        title=data["title"],
-        due_date=data["due_date"],
-        reminder_time=data["reminder_time"],
-        priority=data.get("priority"),
-        user_id=data["user_id"],
-    )
+task_router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
 
 @task_router.get("/")
-def get_tasks():
-    return {"message": "Tasks working"}
+def get_tasks(db: Session = Depends(get_db)):
+    return {"tasks": []}
 
 
+@task_router.post("/")
+def create_task(task: dict, db: Session = Depends(get_db)):
+    return {"message": "Task created", "task": task}
 
-    return task
+

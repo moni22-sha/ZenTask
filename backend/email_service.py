@@ -1,44 +1,34 @@
+# email_service.py
 import smtplib
 from email.message import EmailMessage
 import os
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
 
-SMTP_HOST = os.getenv("SMTP_HOST")
-SMTP_PORT = int(os.getenv("SMTP_PORT"))
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
 SMTP_EMAIL = os.getenv("SMTP_EMAIL")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 
-msg = EmailMessage()
-msg.set_content("Hello")
-msg["Subject"] = "Test Email"
-msg["From"] = SMTP_EMAIL
-msg["To"] = "monisha612003@gmail.com"
+# Check if SMTP credentials are loaded
+if not SMTP_EMAIL or not SMTP_PASSWORD:
+    raise RuntimeError("❌ SMTP_EMAIL or SMTP_PASSWORD not set in .env file")
 
-with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-    server.ehlo()
-    server.starttls()
-    server.ehlo()
-    server.login(SMTP_EMAIL, SMTP_PASSWORD)
-    server.send_message(msg)
-
-print("✅ Email sent successfully")
-print(SMTP_EMAIL, SMTP_PASSWORD)
-print(SMTP_EMAIL)
-print(SMTP_PASSWORD)
 def send_email(to_email: str, subject: str, body: str):
-    sender_email =SMTP_EMAIL
-    app_password = SMTP_PASSWORD
+    """Send an email using Gmail SMTP"""
     msg = EmailMessage()
-    msg["From"] = sender_email
+    msg["From"] = SMTP_EMAIL
     msg["To"] = to_email
     msg["Subject"] = subject
     msg.set_content(body)
 
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
-        server.ehlo()
-        server.starttls()
-        server.ehlo()
-        server.login(sender_email, app_password)
-        server.send_message(msg)
+    try:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.starttls()  # Secure connection
+            server.login(SMTP_EMAIL, SMTP_PASSWORD)
+            server.send_message(msg)
+        print(f"✅ Email sent to {to_email}")
+    except Exception as e:
+        print(f"❌ Failed to send email: {e}")

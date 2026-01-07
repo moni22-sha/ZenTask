@@ -12,6 +12,29 @@ export enum TaskStatus {
   IMPORTANT = 'Important',
   COMPLETED = 'Completed',
 }
+export interface AppNotification {
+  id: string;
+  title: string;
+  message: string;
+  type: "task" | "reminder" | "system";
+  createdAt: string;
+  isRead: boolean;
+}
+export enum NotificationAction {
+  VIEW = "view",
+  DISMISS = "dismiss",
+  COMPLETE_TASK = "complete_task"
+}
+
+export enum ReminderTone {
+  SOFT = "soft",
+  NORMAL = "normal",
+  LOUD = "loud",
+  PROFESSIONAL = "PROFESSIONAL",
+  FRIENDLY = "FRIENDLY",
+  URGENT = "URGENT",
+  CASUAL = "CASUAL"
+}
 
 
 export interface Task {
@@ -25,6 +48,7 @@ export interface Task {
   isImportant: boolean;
   createdAt: string;
    user_id: string;
+   notified?: boolean;
 }
 
 export interface User {

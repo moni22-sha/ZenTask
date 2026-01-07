@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { TaskStatus } from '../types';
-
+import { geminiService } from '../services/geminiService';
 interface SidebarProps {
   currentFilter: TaskStatus;
   setFilter: (filter: TaskStatus) => void;
@@ -63,11 +63,11 @@ const Sidebar: React.FC<SidebarProps> = ({ currentFilter, setFilter, taskCounts 
 
       <div className="p-4 mx-4 mb-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-xl shadow-blue-100 text-white relative overflow-hidden group">
         <div className="relative z-10">
-          <h3 className="font-bold text-sm mb-1">Zen Premium</h3>
-          <p className="text-[10px] opacity-80 leading-relaxed">Unlock cloud sync and priority support for your workflow.</p>
-          <button className="mt-4 w-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white py-2 rounded-lg text-xs font-semibold transition-colors">
-            Upgrade Now
-          </button>
+         
+        
+          <span className="text-2xs font-bold text-white block mb-1">AI Tip</span>
+          <p className="text-sm text-white">"Success is never getting to the bottom of your to-do list."</p>
+        
         </div>
         <div className="absolute top-0 right-0 -mr-4 -mt-4 w-16 h-16 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-500"></div>
       </div>

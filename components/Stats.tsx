@@ -71,11 +71,7 @@ const Stats: React.FC<StatsProps> = ({ tasks }) => {
      
 
         {/* AI Tip */}
-        <div className="p-4 mx-4 mb-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-xl shadow-blue-100 text-white relative overflow-hidden group">
-        
-          <span className="text-2xs font-bold text-white block mb-1">AI Tip</span>
-          <p className="text-sm text-white">{aiTip}</p>
-        </div>
+       
       </div>
 
       {/* Calendar */}
