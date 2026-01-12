@@ -75,7 +75,7 @@ const Stats: React.FC<StatsProps> = ({ tasks }) => {
       </div>
 
       {/* Calendar */}
-      <Calendar />
+      <Calendar isDarkMode={false} />
     </div>
   );
 };

@@ -45,7 +45,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           email,
           name: email.split('@')[0],
           role: role,
-          avatar: `https://picsum.photos/seed/${email}/100/100`
+          avatar: `https://picsum.photos/seed/${email}/100/100`,
+          user: function (user: any, title: string, reminderTime: string): unknown {
+            throw new Error('Function not implemented.');
+          },
+          username: '',
+          isActive: false,
+          reminderTime: ''
         });
       } else {
         alert("Invalid OTP!");

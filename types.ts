@@ -38,6 +38,7 @@ export enum ReminderTone {
 
 
 export interface Task {
+  isUpcoming: any;
   id: string;
   title: string;
   description?: string;
@@ -52,7 +53,9 @@ export interface Task {
 }
 
 export interface User {
-  id: number;
+  user(user: any, title: string, reminderTime: string): unknown;
+  id: string;
+  
   username: string;
   email?: string;
   role: 'admin' | 'user';
@@ -76,7 +79,7 @@ export interface Task {
   id: string;
   title: string;
   email: string;
-  reminderTime: number;
+  reminderTime: string;
   completed: boolean;
     isCompleted: boolean;
   isImportant: boolean;

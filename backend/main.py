@@ -1,9 +1,13 @@
+from pickle import APPEND
 from fastapi import FastAPI, HTTPException
 from admin import admin_router
 from task import task_router
 from scheduler import start_scheduler
 from reminder_service import router as reminder_router
 from email_service import send_email   # ✅ ONLY import send_email
+from reminder_service import router as reminder_router
+
+APPEND.include_router(reminder_router)
 
 from dotenv import load_dotenv
 import traceback

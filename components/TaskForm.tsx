@@ -31,7 +31,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
       setDueDate(initialData.dueDate);
       setPriority(initialData.priority);
       setEmail(initialData.email || "");
-      setReminderTime(initialData.reminderTime || "");
+      setReminderTime(initialData.reminderTime);
     } else if (isOpen) {
       // Default new task values
       const now = new Date();
@@ -70,6 +70,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
       priority,
       email,
       reminderTime,
+      isUpcoming: false,
       completed: initialData?.completed || false,
       isImportant: initialData?.isImportant || false,
       createdAt: initialData?.createdAt || new Date().toISOString(),

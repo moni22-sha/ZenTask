@@ -4,6 +4,7 @@ import { Task, User } from "../types";
 
 interface AdminPageProps {
   tasks?: Task[];
+  user: User[];
   currentUser: User;
 }
 
@@ -123,7 +124,7 @@ const AdminPage: React.FC<AdminPageProps> = ({
 
                       <td className="px-8 py-5">
                         <span className="text-xs font-semibold text-emerald-600">
-                          {user.status}
+                          {user.email}
                         </span>
                       </td>
 

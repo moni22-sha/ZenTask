@@ -69,11 +69,12 @@ const App: React.FC = () => {
       title: taskData.title || '',
       dueDate: taskData.dueDate || new Date().toISOString(),
       priority: taskData.priority || Priority.MEDIUM,
+      isUpcoming: false,
       isCompleted: false,
       isImportant: false,
       createdAt: new Date().toISOString(),
       email: user?.email || '',
-      reminderTime: taskData.reminderTime || 0,
+      reminderTime: taskData.reminderTime || '',
       user_id: user ? user.id.toString() : '',
       completed: false,
     
@@ -112,8 +113,8 @@ const App: React.FC = () => {
     } else if (filter === TaskStatus.IMPORTANT) {
       result = result.filter(t => t.isImportant);
     
-    } else if (filter === TaskStatus.IMPORTANT) {
-      result = result.filter(t => t.isImportant);
+    } else if (filter === TaskStatus.UPCOMING) {
+      result = result.filter(t => t.isUpcoming);
     } else if (filter === TaskStatus.COMPLETED) {
       result = result.filter(t => t.isCompleted);
     }
@@ -203,7 +204,7 @@ const handleManualReminder = async (taskTitle: string, dueDate: string) => {
 {user.role === 'admin' && filter === TaskStatus.ALL ? (
   <AdminPage 
     tasks={tasks} 
-    users={allUsers} // This sends the data into the table
+    user={allUsers} // This sends the data into the table
     currentUser={user} 
   />
 ) : (
@@ -230,6 +231,9 @@ const handleManualReminder = async (taskTitle: string, dueDate: string) => {
                       key={task.id} 
                       task={task} 
                       index={idx}
+                      user={user}
+                    
+                    
                       onToggleComplete={toggleComplete}
                       onToggleImportant={toggleImportant}
                       onDelete={deleteTask}

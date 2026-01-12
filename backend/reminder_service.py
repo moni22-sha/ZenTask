@@ -1,71 +1,85 @@
 from apscheduler.schedulers.background import BackgroundScheduler
-from fastapi import APIRouter
-from pydantic import BaseModel
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, EmailStr
 from database.db import get_db, init_db
-from email_service import send_email  # your email sending function
+from email_service import send_email
 from datetime import datetime
 
-# Initialize database table
+# Initialize database
 init_db()
 
-# FastAPI router
 router = APIRouter()
 
-# Scheduler instance
+# Scheduler
 scheduler = BackgroundScheduler()
 scheduler.start()
 
-# --- Pydantic model ---
+# ✅ FIXED schema (MATCHES FRONTEND)
 class ReminderCreate(BaseModel):
-    user_email: str
-    title: str
-    reminder_time: datetime  # ISO format string
+    task_id: int
+    to_email: EmailStr
+    remind_at: datetime
 
-# --- GET reminders ---
+
+# ---------------- GET reminders ----------------
 @router.get("/reminders")
 def get_reminders():
     db = get_db()
     cursor = db.cursor()
 
-    cursor.row_factory = lambda cursor, row: {
-        "id": row[0],
-        "user_email": row[1],
-        "title": row[2],
-        "reminder_time": row[3],
-        "sent": row[4]
-    }
+    cursor.execute("""
+        SELECT id, task_id, user_email, title, reminder_time, sent
+        FROM reminders
+    """)
 
-    cursor.execute("SELECT id, user_email, title, reminder_time, sent FROM reminders")
-    reminders = cursor.fetchall()
+    rows = cursor.fetchall()
     db.close()
-    return {"reminders": reminders}
 
-# --- POST create reminder ---
+    return {"reminders": rows}
+
+
+# ---------------- POST reminder (ONLY ONE) ----------------
 @router.post("/reminders")
 def create_reminder(reminder: ReminderCreate):
     try:
         db = get_db()
         cursor = db.cursor()
+
+        # 🔹 Fetch task title using task_id
+        cursor.execute("SELECT title FROM tasks WHERE id = ?", (reminder.task_id,))
+        task = cursor.fetchone()
+
+        if not task:
+            raise HTTPException(status_code=404, detail="Task not found")
+
+        title = task[0]
+
         cursor.execute(
-            "INSERT INTO reminders (user_email, title, reminder_time, sent) VALUES (?, ?, ?, 0)",
-            (reminder.user_email, reminder.title, reminder.reminder_time.isoformat())
+            """
+            INSERT INTO reminders (task_id, user_email, title, reminder_time, sent)
+            VALUES (?, ?, ?, ?, 0)
+            """,
+            (
+                reminder.task_id,
+                reminder.to_email,
+                title,
+                reminder.remind_at.isoformat(),
+            ),
         )
+
         db.commit()
         db.close()
-        return {"message": "Reminder created successfully", "reminder": reminder.dict()}
-    except Exception as e:
-        return {"error": str(e)}
 
-# --- Scheduler job ---
+        return {"message": "Reminder scheduled successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------------- Scheduler job ----------------
 def check_reminders():
     db = get_db()
     cursor = db.cursor()
-
-    cursor.row_factory = lambda cursor, row: {
-        "id": row[0],
-        "user_email": row[1],
-        "title": row[2]
-    }
 
     cursor.execute("""
         SELECT id, user_email, title
@@ -79,27 +93,26 @@ def check_reminders():
     for r in reminders_due:
         try:
             send_email(
-                r["user_email"],
+                r[1],
                 "Task Reminder",
-                f"Reminder: {r['title']}"
+                f"Reminder: {r[2]}"
             )
-            cursor.execute("UPDATE reminders SET sent = 1 WHERE id = ?", (r["id"],))
-            print(f"Reminder sent to {r['user_email']} for task '{r['title']}'")
+            cursor.execute(
+                "UPDATE reminders SET sent = 1 WHERE id = ?",
+                (r[0],)
+            )
         except Exception as e:
-            print(f"Failed to send reminder to {r['user_email']}: {e}")
+            print("Email failed:", e)
 
     db.commit()
     db.close()
 
-# --- Start scheduler ---
+
+# ---------------- Start scheduler ----------------
 def start_scheduler():
     if not scheduler.get_jobs():
-        scheduler.add_job(check_reminders, "interval", minutes=1, id="reminder_job")
-        print("Reminder scheduler started.")
+        scheduler.add_job(check_reminders, "interval", minutes=1)
+        print("✅ Reminder scheduler started")
 
-# Start scheduler automatically
+
 start_scheduler()
-
-
-
-

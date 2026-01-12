@@ -20,3 +20,10 @@ class TaskCreate(BaseModel):
     email: EmailStr
     dueDate: datetime
     reminderMinutes: int
+
+
+
+class ReminderCreate(BaseModel):
+    task_id: int
+    to_email: EmailStr
+    remind_at: datetime

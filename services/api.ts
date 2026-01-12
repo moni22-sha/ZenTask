@@ -2,7 +2,7 @@ import axios from "axios";
 import { Todo, User, UserRole } from '../types';
 
 const API_BASE_URL = 'http://localhost:5000/api';
-export const triggerEmailReminder = async (data: {
+export const triggerEmailReminder = async (email: string, id: string, _title: string, reminderTime: string, data: {
   email: string;
   title: string;
   reminderTime: string;
