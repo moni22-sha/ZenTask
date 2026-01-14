@@ -112,4 +112,12 @@ This is a reminder for your task:
         print("🔥 EMAIL ERROR:", traceback.format_exc())
         # Safe fallback: return error details
         raise HTTPException(status_code=500, detail=f"Failed to send email: {e}")
+class UserCreate(BaseModel):
+    username: str
+    email: str
+    password: str
 
+@app.post("/admin/users")
+async def create_user(user: UserCreate):
+    # Your logic to save user
+    return {"message": "User created"}
