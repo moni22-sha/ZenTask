@@ -20,7 +20,7 @@ export interface AppNotification {
   createdAt: string;
   isRead: boolean;
 }
-export enum NotificationAction {
+export enum Notification {
   VIEW = "view",
   DISMISS = "dismiss",
   COMPLETE_TASK = "complete_task"
@@ -131,3 +131,20 @@ export const cancelReminder = (reminderId: string) => {
   console.log('Reminder cancelled:', reminderId);
 };
 
+export type NotificationType =
+  | 'TASK'
+  | 'REMINDER'
+  | 'AI';
+
+export type NotificationAction =
+  | 'DISMISS'
+  | 'COMPLETE'
+  | 'SNOOZE';
+
+export interface AppNotification {
+  id: string;
+  
+  title: string;
+  message: string;
+  taskId?: string; // ✅ optional because AI/system may not have tasks
+}

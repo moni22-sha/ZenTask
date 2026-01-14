@@ -1,28 +1,26 @@
-import requests # type: ignore
-from typing import Dict, Any
+import os
+import smtplib
+from email.message import EmailMessage
 
-API_URL = "http://your-api-url"
+def send_email(to_email: str, subject: str, body: str) -> bool:
+    try:
+        msg = EmailMessage()
+        msg["From"] = os.getenv("SMTP_EMAIL")
+        msg["To"] = to_email
+        msg["Subject"] = subject
+        msg.set_content(body)
 
-async def send_otp(email: str) -> Dict[str, Any]:
-    res = requests.post(
-        f"{API_URL}/otp/send",
-        headers={"Content-Type": "application/json"},
-        json={"email": email},
-    )
+        with smtplib.SMTP(os.getenv("SMTP_HOST"), int(os.getenv("SMTP_PORT"))) as server:
+            server.starttls()
+            server.login(
+                os.getenv("SMTP_EMAIL"),
+                os.getenv("SMTP_PASSWORD")
+            )
+            server.send_message(msg)
 
-    if res.status_code != 200:
-        raise Exception("Failed to send OTP")
+        print("✅ Email sent successfully")
+        return True
 
-    return res.json()
-
-async def verify_otp(otp: str) -> Dict[str, Any]:
-    res = requests.post(
-        f"{API_URL}/otp/verify",
-        headers={"Content-Type": "application/json"},
-        json={"otp": otp},
-    )
-
-    if res.status_code != 200:
-        raise Exception("Invalid OTP")
-
-    return res.json()
+    except Exception as e:
+        print("❌ SMTP Error:", e)
+        return False

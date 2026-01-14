@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Task, Priority, User } from '../types';
 import { ICONS } from '../constants';
-import { triggerEmailReminder } from '../services/api';
+import { toast } from 'react-toastify';
 
 interface TaskItemProps {
   task: Task;
@@ -20,42 +20,52 @@ const TaskItem: React.FC<TaskItemProps> = ({
   onToggleImportant,
   onDelete,
   onEdit,
-  index
+  index,
 }) => {
+  const [loading, setLoading] = useState(false);
 
-  // ✅ FIXED reminder handler
   const handleReminder = async () => {
-    if(!task.id){
-      alert("Task ID is sending....");
-      return;
-    }
-    // 1️⃣ Email check
-    if (!user?.email) {
-      alert("User email not found. Please login again.");
+    if (!task.id) {
+      toast.error("Task ID missing");
       return;
     }
 
-    // 2️⃣ Reminder time check
-    if (!task.reminderTime) {
-      alert("Please set a reminder time first.");
+    if (!user?.email) {
+      toast.error("User email not found");
       return;
     }
+
+    if (!task.dueDate) {
+      toast.error("Task due date missing");
+      return;
+    }
+
+    setLoading(true);
 
     try {
-      await EmailReminder(
-        
-        user.email,
-        task.id,
-        task.title,
+      const response = await fetch("http://localhost:8000/email/reminders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          taskId: task.id,
+          email: user.email,
+          title: task.title,
+          reminderTime: new Date(task.dueDate).toISOString(), // send ISO string
+        }),
+      });
 
-        task.reminderTime,
-      
-      );
+      const data = await response.json();
 
-      alert("Reminder scheduled successfully ✅");
+      if (response.ok) {
+        toast.success(data.message || "Reminder sent!");
+      } else {
+        toast.error(data.detail || JSON.stringify(data));
+      }
     } catch (err) {
-      console.error("Reminder error:", err);
-      alert("Failed to send reminder");
+      console.error(err);
+      toast.error("Server not reachable");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,17 +84,17 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
   return (
     <div className="group bg-white rounded-2xl p-4 border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all flex items-center gap-4 mb-3">
-
-      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-500 text-xs font-bold shrink-0">
+      
+      <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-500 text-xs font-bold flex items-center justify-center">
         {index + 1}
       </div>
 
       <button
         onClick={() => onToggleComplete(task.id)}
-        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shrink-0 ${
+        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
           task.isCompleted
             ? 'bg-blue-600 border-blue-600 text-white'
-            : 'border-gray-300 hover:border-blue-400'
+            : 'border-gray-300'
         }`}
       >
         {task.isCompleted && <ICONS.Check className="w-4 h-4" />}
@@ -92,65 +102,56 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <h3
-            className={`text-xl font-semibold truncate ${
-              task.isCompleted ? 'text-gray-400 line-through' : 'text-gray-800'
-            }`}
-          >
+          <h3 className={`text-lg font-semibold truncate ${
+            task.isCompleted ? 'line-through text-gray-400' : 'text-gray-800'
+          }`}>
             {task.title}
           </h3>
-          <span
-            className={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${getPriorityColor(
-              task.priority
-            )}`}
-          >
+
+          <span className={`text-[10px] px-2 py-0.5 rounded-full border ${getPriorityColor(task.priority)}`}>
             {task.priority}
           </span>
         </div>
 
-        <div className="flex items-center gap-3 mt-1">
-          <span className="text-xs text-gray-400 flex items-center gap-1">
-            <ICONS.Calendar className="w-3 h-3" />
-            {new Date(task.dueDate).toLocaleString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}
-          </span>
+        <div className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+          <ICONS.Calendar className="w-3 h-3" />
+          {new Date(task.dueDate).toLocaleString()}
         </div>
       </div>
 
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-
-        {/* ✅ REMINDER BUTTON */}
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+        
         <button
+          type="button"
           onClick={handleReminder}
-          title="Send Email Reminder"
-          className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-gray-100 rounded-lg transition-colors"
+          disabled={loading}
+          title="Send Email Reminder Now"
+          className={`p-1.5 rounded-lg ${
+            loading
+              ? "text-gray-300 cursor-not-allowed"
+              : "text-gray-400 hover:text-green-600 hover:bg-gray-100"
+          }`}
         >
-          <ICONS.Calendar className="w-5 h-5" />
+          <ICONS.Calendar className="w-5 h-5 pointer-events-none" />
         </button>
 
         <button
           onClick={() => onToggleImportant(task.id)}
-          className={`p-1.5 rounded-lg hover:bg-gray-100 transition-colors ${
-            task.isImportant ? 'text-amber-500' : 'text-gray-400'
-          }`}
+          className={`p-1.5 rounded-lg ${task.isImportant ? 'text-amber-500' : 'text-gray-400'}`}
         >
           <ICONS.Star className="w-5 h-5" />
         </button>
 
         <button
           onClick={() => onEdit(task)}
-          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-lg"
         >
           <ICONS.Edit className="w-5 h-5" />
         </button>
 
         <button
           onClick={() => onDelete(task.id)}
-          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-gray-100 rounded-lg"
         >
           <ICONS.Trash className="w-5 h-5" />
         </button>
@@ -160,7 +161,3 @@ const TaskItem: React.FC<TaskItemProps> = ({
 };
 
 export default TaskItem;
-function EmailReminder(email: string, id: string, title: string, reminderTime: string) {
-  throw new Error('Function not implemented.');
-}
-

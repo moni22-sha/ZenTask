@@ -27,3 +27,8 @@ class ReminderCreate(BaseModel):
     task_id: int
     to_email: EmailStr
     remind_at: datetime
+class ReminderRequest(BaseModel):
+    to_email: EmailStr
+    title: str
+    message: str
+    reminderTime: datetime
